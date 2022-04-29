@@ -1,5 +1,5 @@
 
-IMAGE_NAME := go-simpleprotoc
+IMAGE_NAME := simpleprotoc:go
 
 VERSION := 3.20.0
 ARCH := linux-x86_64

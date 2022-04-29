@@ -16,8 +16,8 @@
 
 set -eo pipefail
 
-if [-z "${SPROTOC_IMAGE_NAME}" ]; then 
-	SPROTOC_IMAGE_NAME=go-simpleprotoc
+if [ -z "${SPROTOC_IMAGE_NAME}" ]; then
+	SPROTOC_IMAGE_NAME="simpleprotoc:go"
 fi
 
 VOLUME_SRC=/proto
