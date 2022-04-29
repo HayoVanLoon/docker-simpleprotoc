@@ -16,7 +16,9 @@
 
 set -eo pipefail
 
-IMAGE_NAME=go-simpleprotoc
+if [-z "${SPROTOC_IMAGE_NAME}" ]; then 
+	SPROTOC_IMAGE_NAME=go-simpleprotoc
+fi
 
 VOLUME_SRC=/proto
 VOLUME_OUT=/out
@@ -30,7 +32,7 @@ ${B}NAME${X}
     ${0} - generate code from Protocol Buffers specifications
 
 ${B}SYNOPSIS${X}
-    ${0}  [--source-dir DIR] [--target DIR] --out DIR [--flavours FLAVOURS] [-f] [-i]
+    ${0}  [--source-dir DIR] [--target DIR] [--out DIR] [--flavours FLAVOURS] [-f] [-i] [--extra-opts TEXT]
 
 ${B}DESCRIPTION${X}
     Runs the protoc compiler docker image for the requested output.
@@ -45,7 +47,7 @@ ${B}DESCRIPTION${X}
         not be compiled.
 
     ${B}--out${X} DIR
-        Location of the Protocol Buffers specifications. Required.
+        Location of the Protocol Buffers specifications. Defaults to 'out'.
 
     ${B}--flavours${X} FLAVOURS
         FLAVOURS is a string containing the output types. Valid characters are:
@@ -60,8 +62,12 @@ ${B}DESCRIPTION${X}
     ${B}-i${X}
         Run interactive shell (for debugging).
 
+    ${B}--extra-opts${X} TEXT
+        Appends additional options (in text) to the build container's entrypoint
+        script.
+
 ${B}EXAMPLES${X}
-    ${B}generate.sh --out out${X}
+    ${B}generate.sh${X}
 
     Generates a message code for proto specifications found recursively from the
     current directory.
@@ -131,7 +137,7 @@ while true; do
 	--lang)
 		case "${2}" in
 		go)
-			IMAGE_NAME=go-simpleprotoc
+			SPROTOC_IMAGE_NAME=go-simpleprotoc
 			;;
 		*)
 			echo >&2 "Unsupported language '${2}'"
@@ -164,8 +170,7 @@ while true; do
 done
 
 if [ -z "${OUT}" ]; then
-	echo >&2 "Missing --out <output dir>"
-	exit 3
+	OUT=out
 fi
 
 if [ -z "${SRC}" ]; then
@@ -217,7 +222,7 @@ docker run --rm \
 	--read-only -v "$(pwd)":"${VOLUME_SRC}/" \
 	-v "$(pwd)/${OUT}":"${VOLUME_OUT}" \
 	--tmpfs "${TMPFS_GO_PKG}" \
-	-i -t ${IMAGE_NAME} ${CMD}
+	-i -t ${SPROTOC_IMAGE_NAME} ${CMD}
 
 if [ -n "${CMD}" ]; then
 	exit 0
