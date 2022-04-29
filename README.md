@@ -1,16 +1,19 @@
-# Simple Protoc
+# Simple Protoc 
 
 A script that uses conventions to provide simplified, containerised compilation
-of protocol buffers. It can be as simple as `generate.sh`.
+of protocol buffers. Compiling Protocol Buffers can be as simple as:
+```
+./sprotoc.sh
+```
 
 ## Usage
 
-Build the image, then use the `generate.sh` script with applicable parameters.
+Build the image, then use the `sprotoc.sh` script with applicable parameters.
 
 If you build the image with a custom name, you should set the environment
-variable `SPROTOC_IMAGE_NAME` to this name before running the `generate.sh`.
+variable `SPROTOC_IMAGE_NAME` to this name before running `sprotoc.sh`.
 
-See `generate.sh --help` for a complete overview of options.
+See `sprotoc.sh --help` for a complete overview of options.
 
 ## Support
 
@@ -41,7 +44,7 @@ simpler tree structure will also suffice, i.e.:
 
 ## Output
 
-Using `generate.sh --out out --flavours dpg` on the simple example structure
+Using `sprotoc.sh --out out --flavours dpg` on the simple example structure
 above.
 
 ### Go
@@ -75,28 +78,28 @@ out/
 ## Examples
 
 ```
-generate.sh --out out
+sprotoc.sh --out out
 ```
 
 Generates a message code for proto specifications found recursively from the
 current directory.
 
 ```
-generate.sh --out out --flavours dpg
+sprotoc.sh --out out --flavours dpg
 ```
 
 Generates a descriptor, message and server code for proto specifications found
 recursively from the current directory.
 
 ```
-generate.sh --out out --flavours d --extra-opts "--no-googleapis-import"
+sprotoc.sh --out out --flavours d --extra-opts "--no-googleapis-import"
 ```
 
 When run from the root of the googleapis repository, generates a descriptor. The
 extra option avoids clashes in this case.
 
 ```
-generate.sh --out out --target google/firestore --flavours dp \
+sprotoc.sh --out out --target google/firestore --flavours dp \
     --extra-opts "--no-googleapis-import"
 ```
 

@@ -67,22 +67,22 @@ ${B}DESCRIPTION${X}
         script.
 
 ${B}EXAMPLES${X}
-    ${B}generate.sh${X}
+    ${B}${0}${X}
 
     Generates a message code for proto specifications found recursively from the
     current directory.
 
-    ${B}generate.sh --out out --flavours dpg${X}
+    ${B}${0} --out out --flavours dpg${X}
 
     Generates a descriptor, message and server code for proto specifications
     found recursively from the current directory.
 
-    ${B}generate.sh --out out --flavours d --extra-opts \"--no-googleapis-import\"${X}
+    ${B}${0} --out out --flavours d --extra-opts \"--no-googleapis-import\"${X}
 
 	When run from the root of the googleapis repository, generates a descriptor.
 	The extra option avoids clashes in this case.
 
-    ${B}generate.sh --out out --target google/firestore --flavours dp
+    ${B}${0} --out out --target google/firestore --flavours dp
 	    --extra-opts \"--no-googleapis-import\"${X}
 
 	When run from the root of the googleapis repository, generates a descriptor
