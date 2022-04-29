@@ -10,6 +10,9 @@ of protocol buffers. Compiling Protocol Buffers can be as simple as:
 
 Build the image, then use the `sprotoc.sh` script with applicable parameters.
 
+Uses `sudo` to change ownership of output to the current user, which might 
+trigger a password request.
+
 If you build the image with a custom name, you should set the environment
 variable `SPROTOC_IMAGE_NAME` to this name before running `sprotoc.sh`.
 

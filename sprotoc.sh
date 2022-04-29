@@ -201,13 +201,26 @@ for ((i = 0; i < ${#FLAVOURS}; i += 1)); do
 	esac
 done
 
-if [ -z "${FORCE}" ] && [ $(ls "${OUT}" 2>/dev/null) ]; then
+if [ -z "${FORCE}" ] && [ -e "${OUT}" ]; then
 	echo "Output directory '${OUT}' is not empty, use -f to ignore"
 	exit 3
 fi
 
 rm -rf "${OUT}"
 mkdir -p "${OUT}"
+
+if [ "${SRC:0:1}" = "/" ]; then
+	ABS_SRC=${SRC}
+else
+	ABS_SRC="$(pwd)/${SRC}"
+fi
+
+if [ "${OUT:0:1}" = "/" ]; then
+	ABS_OUT=${OUT}
+else
+	ABS_OUT="$(pwd)/${OUT}"
+fi
+
 
 docker run --rm \
 	-e SRC="${VOLUME_SRC}" \
@@ -219,8 +232,8 @@ docker run --rm \
 	-e GO_GAPIC_PACKAGE="${GO_GAPIC_PACKAGE}" \
 	-e GO_GAPIC_MODULE_PREFIX="${GO_GAPIC_MODULE_PREFIX}" \
 	-e EXTRA_OPTS="${EXTRA_OPTS}" \
-	--read-only -v "$(pwd)":"${VOLUME_SRC}/" \
-	-v "$(pwd)/${OUT}":"${VOLUME_OUT}" \
+	--read-only -v "${ABS_SRC}":"${VOLUME_SRC}/" \
+	-v "${ABS_OUT}":"${VOLUME_OUT}" \
 	--tmpfs "${TMPFS_GO_PKG}" \
 	-i -t ${SPROTOC_IMAGE_NAME} ${CMD}
 
