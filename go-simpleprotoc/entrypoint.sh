@@ -20,6 +20,8 @@ DESCRIPTOR_OUT=
 
 GAPIC_PACKAGE=
 
+IMPORT_GOOGLEAPIS=-I"${PROTO_GOOGLEAPIS}"
+
 while true; do
 	case "${1}" in
 	--source-dir)
@@ -54,6 +56,10 @@ while true; do
 		GAPIC_MODULE_PREFIX="${2}"
 		shift 2
 		;;
+	--no-googleapis-import)
+		IMPORT_GOOGLEAPIS=
+		shift 1
+		;;
 	*)
 		if [ -n "${1}" ]; then
 			echo "Unexpected parameter ${1}"
@@ -73,6 +79,8 @@ protoc_descriptor() {
 	_TARGET="${1}"
 	_DESCRIPTOR_OUT="${2}"
 
+	echo "Creating ${_DESCRIPTOR_OUT}"
+
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
 	fi
@@ -87,7 +95,7 @@ protoc_descriptor() {
 		--descriptor_set_out=${_DESCRIPTOR_OUT} \
 		--include_imports \
 		--include_source_info \
-		-I"${PROTO_GOOGLEAPIS}" \
+		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
 
@@ -99,6 +107,8 @@ protoc_protobuf() {
 	_TARGET="${1}"
 	_OUT="${2}"
 	_NO_SOURCE_RELATIVE="${3}"
+
+	echo "Compiling Protocol Buffer message code"
 
 	_GO_OPT_PATH=
 	if [ -z "${_NO_SOURCE_RELATIVE}" ]; then
@@ -120,7 +130,7 @@ protoc_protobuf() {
 	protoc \
 		--go_out="${_OUT}" \
 		${_GO_OPT_PATH} \
-		-I"${PROTO_GOOGLEAPIS}" \
+		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
 
@@ -134,6 +144,8 @@ protoc_protobuf() {
 protoc_grpc() {
 	_TARGET="${1}"
 	_OUT="${2}"
+
+	echo "Compiling gRPC server code"
 
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
@@ -152,7 +164,7 @@ protoc_grpc() {
 		--go_opt=paths=source_relative \
 		--go-grpc_out="${_OUT}" \
 		--go-grpc_opt=paths=source_relative \
-		-I"${PROTO_GOOGLEAPIS}" \
+		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
 
@@ -167,6 +179,8 @@ protoc_gapic() {
 	_OUT="${2}"
 	_GAPIC_PACKAGE="${3}"
 	_GAPIC_MODULE_PREFIX="${4}"
+
+	echo "Generating GAPIC client code"
 
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
@@ -188,7 +202,7 @@ protoc_gapic() {
 		--go-gapic_out=${_OUT} \
 		--go-gapic_opt=go-gapic-package=${_GAPIC_PACKAGE} \
 		${_GAPIC_MODULE_PARAM} \
-		-I"${PROTO_GOOGLEAPIS}" \
+		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
 

@@ -57,6 +57,7 @@ ENV DESCRIPTOR_OUT="/out/descriptor.pb"
 
 ENV GO_GAPIC_PACKAGE=""
 ENV GAPIC_MODULE_PREFIX=""
+ENV EXTRA_OPTS=""
 
 COPY entrypoint.sh /scripts/
 
@@ -68,4 +69,5 @@ CMD /scripts/entrypoint.sh \
     --grpc-out "${GO_GRPC_OUT}" \
     --gapic-out "${GO_GAPIC_OUT}" \
     --gapic-package "${GO_GAPIC_PACKAGE}" \
-    --gapic-module-prefix "${GAPIC_MODULE_PREFIX}"
+    --gapic-module-prefix "${GAPIC_MODULE_PREFIX}" \
+    ${EXTRA_OPTS}

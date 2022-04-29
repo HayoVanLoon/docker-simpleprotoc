@@ -16,7 +16,7 @@ ${B}NAME${X}
     ${0} - generate code from Protocol Buffers specifications
 
 ${B}SYNOPSIS${X}
-    ${0}  [--source-dir DIR] --target DIR --out DIR [--flavours FLAVOURS] [-f] [-i]
+    ${0}  [--source-dir DIR] [--target DIR] --out DIR [--flavours FLAVOURS] [-f] [-i]
 
 ${B}DESCRIPTION${X}
     Runs the protoc compiler docker image for the requested output.
@@ -45,6 +45,29 @@ ${B}DESCRIPTION${X}
 
     ${B}-i${X}
         Run interactive shell (for debugging).
+
+${B}EXAMPLES${X}
+    ${B}generate.sh --out out${X}
+
+    Generates a message code for proto specifications found recursively from the
+    current directory.
+
+    ${B}generate.sh --out out --flavours dpg${X}
+
+    Generates a descriptor, message and server code for proto specifications
+    found recursively from the current directory.
+
+    ${B}generate.sh --out out --flavours d --extra-opts \"--no-googleapis-import\"${X}
+
+	When run from the root of the googleapis repository, generates a descriptor.
+	The extra option avoids clashes in this case.
+
+    ${B}generate.sh --out out --target google/firestore --flavours dp
+	    --extra-opts \"--no-googleapis-import\"${X}
+
+	When run from the root of the googleapis repository, generates a descriptor
+	and message code for Firestore. The extra option avoids clashes in this
+	case.
 "
 }
 
@@ -55,6 +78,8 @@ FLAVOURS=p
 
 GO_GAPIC_PACKAGE=
 GO_GAPIC_MODULE_PREFIX=
+
+EXTRA_OPTS=
 
 FORCE=
 CMD=
@@ -85,6 +110,10 @@ while true; do
 		GO_GAPIC_MODULE_PREFIX="${2}"
 		shift 2
 		;;
+	--extra-opts)
+		EXTRA_OPTS="${2}"
+		shift 2
+		;;
 	--lang)
 		case "${2}" in
 		go)
@@ -110,9 +139,9 @@ while true; do
 		exit 0
 		;;
 	*)
-		usage
 		if [ -n "${1}" ]; then
-			echo "Unexpected parameter ${1}"
+			usage
+			echo "Unexpected parameter '${1}'"
 			exit 3
 		fi
 		break
@@ -153,7 +182,7 @@ for ((i = 0; i < ${#FLAVOURS}; i += 1)); do
 	esac
 done
 
-if [ -z "${FORCE}" ] && [ $(find "${OUT}" 2>/dev/null) ]; then
+if [ -z "${FORCE}" ] && [ $(ls "${OUT}" 2>/dev/null) ]; then
 	echo "Output directory '${OUT}' is not empty, use -f to ignore"
 	exit 3
 fi
@@ -170,6 +199,7 @@ docker run --rm \
 	-e DESCRIPTOR_OUT=${DESCRIPTOR_OUT} \
 	-e GO_GAPIC_PACKAGE="${GO_GAPIC_PACKAGE}" \
 	-e GO_GAPIC_MODULE_PREFIX="${GO_GAPIC_MODULE_PREFIX}" \
+	-e EXTRA_OPTS="${EXTRA_OPTS}" \
 	--read-only -v "$(pwd)":"${VOLUME_SRC}/" \
 	-v "$(pwd)/${OUT}":"${VOLUME_OUT}" \
 	--tmpfs "${TMPFS_GO_PKG}" \
