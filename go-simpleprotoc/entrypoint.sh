@@ -5,7 +5,10 @@ set -eo pipefail
 WARNINGS=
 
 # Path to api-common-protos. PROTO_GOOGLEAPIS is used for historical reasons.
-PROTO_GOOGLEAPIS="/proto/googleapis"
+if [ -z "${PROTO_GOOGLEAPIS}" ]; then
+	echo >&2 "PROTO_GOOGLEAPIS has not been set"
+	exit 3
+fi
 
 SRC=
 TARGET=
@@ -194,7 +197,7 @@ protoc_gapic() {
 
 init_mods() {
 	_OUT=${1}
-	echo "Initialising modules ..."
+	echo "Initialising modules in ${1} ..."
 	SAFE_PATH=$(sed -E 's/\//\\\//g' <<<${_OUT})
 	PACKAGES=$(find ${_OUT} -type f | sed -E "s/^${SAFE_PATH}\/(.+)\/.+\.go$/\1/g" | uniq)
 	for package in $PACKAGES; do
@@ -208,7 +211,7 @@ init_mods() {
 		fi
 		echo "... done (${NOT_V1})"
 	done
-	echo ".. done (initialising modules)"
+	echo ".. done (initialising modules in ${1})"
 }
 
 report() {

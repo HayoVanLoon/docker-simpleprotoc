@@ -27,7 +27,7 @@ COPY --from=downloader /downloads/protoc/ ./
 RUN ln -s /usr/local/protoc/bin/protoc /usr/local/bin/protoc
 
 # Copy API Common Protos
-COPY --from=downloader /downloads/api-common-protos-main/ /proto/googleapis/
+COPY --from=downloader /downloads/api-common-protos-main/ /googleapis/
 
 # Protobuf Go
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@${GO_PLUGIN_VERSION}
@@ -44,6 +44,8 @@ RUN mv "${GOPATH}/bin/protoc-gen-go_gapic" "${GOPATH}/bin/protoc-gen-go-gapic"
 VOLUME /proto /out
 
 WORKDIR /proto
+
+ENV PROTO_GOOGLEAPIS="/googleapis"
 
 ENV SRC=""
 ENV TARGET=""

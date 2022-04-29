@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -exo pipefail
+set -eo pipefail
 
 IMAGE_NAME=go-simpleprotoc
 
@@ -8,29 +8,53 @@ VOLUME_SRC=/proto
 VOLUME_OUT=/out
 TMPFS_GO_PKG=/go/pkg
 
+usage() {
+	echo "IMAGE_NAME
+	${0} - generate code from Protocol Buffers specifications
+
+Synopsis
+	${0}  [--source-dir DIR] --target DIR --out DIR [--flavours FLAVOURS] [-f] [-i]
+
+Description
+	Runs the protoc compiler docker image for the requested output.
+
+	--source-dir DIR
+		Directory that will be mounted as (read-only) source. Defaults to current directory.
+
+	--target DIR
+		Directory with target the Protocol Buffers specifications. This is useful if the source directory contains external dependencies that need not be compiled.
+
+	--out DIR
+		Location of the Protocol Buffers specifications. Required.
+
+	--flavours FLAVOURS
+		FLAVOURS is a string containing the output types. Valid characters are:
+		p - Protocol Buffers message code (default)
+		g - gRPC server code
+		d - Descriptor set
+		c - GAPIC client code
+
+	-f
+		Do no ask to overwrite output directory if present.
+
+	-i
+		Run interactive shell (for debugging).
+"
+}
+
 SRC=
 TARGET=
 OUT=
+FLAVOURS=p
 
-GAPIC_PACKAGE=
+GO_GAPIC_PACKAGE=
+GO_GAPIC_MODULE_PREFIX=
 
 FORCE=
 CMD=
 
 while true; do
 	case "${1}" in
-	--lang)
-		case "${2}" in
-		go)
-			IMAGE_NAME=go-simpleprotoc
-			;;
-		*)
-			>&2 echo "Unsupported language '${2}'"
-			exit 3
-			;;
-		esac
-		shift 2
-		;;
 	--source-dir)
 		SRC="${2}"
 		shift 2
@@ -47,12 +71,24 @@ while true; do
 		FLAVOURS="${2}"
 		shift 2
 		;;
-	--gapic-package)
-		GAPIC_PACKAGE="${2}"
+	--go-gapic-package)
+		GO_GAPIC_PACKAGE="${2}"
 		shift 2
 		;;
-	--gapic-module-prefix)
-		GAPIC_MODULE_PREFIX="${2}"
+	--go-gapic-module-prefix)
+		GO_GAPIC_MODULE_PREFIX="${2}"
+		shift 2
+		;;
+	--lang)
+		case "${2}" in
+		go)
+			IMAGE_NAME=go-simpleprotoc
+			;;
+		*)
+			>&2 echo "Unsupported language '${2}'"
+			exit 3
+			;;
+		esac
 		shift 2
 		;;
 	-i)
@@ -77,10 +113,6 @@ if [ -z "${OUT}" ]; then
 	echo >&2 "Missing --out <output dir>"
 	exit 3
 fi
-if [ -z "${TARGET}" ]; then
-	echo >&2 "Missing TARGET"
-	exit 3
-fi
 
 if [ -z "${SRC}" ]; then
 	SRC=.
@@ -97,7 +129,7 @@ for ((i = 0; i < ${#FLAVOURS}; i += 1)); do
 	p) GO_OUT="/out/protobuf" ;;
 	g) GO_GRPC_OUT="/out/grpc" ;;
 	c)
-		if [ -z "${GAPIC_PACKAGE}" ]; then
+		if [ -z "${GO_GAPIC_PACKAGE}" ]; then
 			echo >&2 "Missing --gapic-package <client package name>"
 			exit 3
 		fi
@@ -119,14 +151,15 @@ rm -rf "${OUT}"
 mkdir -p "${OUT}"
 
 docker run --rm \
-	-e SRC="${VOLUME_SRC}/${TARGET}" \
+	-e SRC="${VOLUME_SRC}" \
+	-e TARGET="${TARGET}" \
 	-e GO_OUT="${GO_OUT}" \
 	-e GO_GRPC_OUT="${GO_GRPC_OUT}" \
 	-e GO_GAPIC_OUT="${GO_GAPIC_OUT}" \
 	-e DESCRIPTOR_OUT=${DESCRIPTOR_OUT} \
 	-e GO_GAPIC_PACKAGE="${GO_GAPIC_PACKAGE}" \
-	-e GAPIC_MODULE_PREFIX="${GAPIC_MODULE_PREFIX}" \
-	--read-only -v "$(pwd)/${TARGET}":"${VOLUME_SRC}/${TARGET}/" \
+	-e GO_GAPIC_MODULE_PREFIX="${GO_GAPIC_MODULE_PREFIX}" \
+	--read-only -v "$(pwd)":"${VOLUME_SRC}/" \
 	-v "$(pwd)/${OUT}":"${VOLUME_OUT}" \
 	--tmpfs "${TMPFS_GO_PKG}" \
 	-i -t ${IMAGE_NAME} ${CMD}
