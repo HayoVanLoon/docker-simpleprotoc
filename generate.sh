@@ -9,36 +9,42 @@ VOLUME_OUT=/out
 TMPFS_GO_PKG=/go/pkg
 
 usage() {
-	echo "IMAGE_NAME
-	${0} - generate code from Protocol Buffers specifications
+	B=$(tput bold)
+	X=$(tput sgr0)
+	echo -e "
+${B}NAME${X}
+    ${0} - generate code from Protocol Buffers specifications
 
-Synopsis
-	${0}  [--source-dir DIR] --target DIR --out DIR [--flavours FLAVOURS] [-f] [-i]
+${B}SYNOPSIS${X}
+    ${0}  [--source-dir DIR] --target DIR --out DIR [--flavours FLAVOURS] [-f] [-i]
 
-Description
-	Runs the protoc compiler docker image for the requested output.
+${B}DESCRIPTION${X}
+    Runs the protoc compiler docker image for the requested output.
 
-	--source-dir DIR
-		Directory that will be mounted as (read-only) source. Defaults to current directory.
+    ${B}--source-dir${X} DIR
+        Directory that will be mounted as (read-only) source. Defaults to
+        current directory.
 
-	--target DIR
-		Directory with target the Protocol Buffers specifications. This is useful if the source directory contains external dependencies that need not be compiled.
+    ${B}--target${X} DIR
+        Directory with target the Protocol Buffers specifications. This is
+        useful if the source directory contains external dependencies that need
+        not be compiled.
 
-	--out DIR
-		Location of the Protocol Buffers specifications. Required.
+    ${B}--out${X} DIR
+        Location of the Protocol Buffers specifications. Required.
 
-	--flavours FLAVOURS
-		FLAVOURS is a string containing the output types. Valid characters are:
-		p - Protocol Buffers message code (default)
-		g - gRPC server code
-		d - Descriptor set
-		c - GAPIC client code
+    ${B}--flavours${X} FLAVOURS
+        FLAVOURS is a string containing the output types. Valid characters are:
+        p - Protocol Buffers message code (default)
+        g - gRPC server code
+        d - Descriptor set
+        c - GAPIC client code
 
-	-f
-		Do no ask to overwrite output directory if present.
+    ${B}-f${X}
+        Do no ask to overwrite output directory if present.
 
-	-i
-		Run interactive shell (for debugging).
+    ${B}-i${X}
+        Run interactive shell (for debugging).
 "
 }
 
@@ -63,7 +69,7 @@ while true; do
 		TARGET="${2}"
 		shift 2
 		;;
-	--out | -o)
+	--out)
 		OUT="${2}"
 		shift 2
 		;;
@@ -85,7 +91,7 @@ while true; do
 			IMAGE_NAME=go-simpleprotoc
 			;;
 		*)
-			>&2 echo "Unsupported language '${2}'"
+			echo >&2 "Unsupported language '${2}'"
 			exit 3
 			;;
 		esac
@@ -99,7 +105,12 @@ while true; do
 		FORCE=1
 		shift 1
 		;;
+	--help | -h)
+		usage
+		exit 0
+		;;
 	*)
+		usage
 		if [ -n "${1}" ]; then
 			echo "Unexpected parameter ${1}"
 			exit 3
