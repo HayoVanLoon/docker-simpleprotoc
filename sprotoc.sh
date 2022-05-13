@@ -232,9 +232,8 @@ docker run --rm \
 	-e GO_GAPIC_PACKAGE="${GO_GAPIC_PACKAGE}" \
 	-e GO_GAPIC_MODULE_PREFIX="${GO_GAPIC_MODULE_PREFIX}" \
 	-e EXTRA_OPTS="${EXTRA_OPTS}" \
-	--read-only -v "${ABS_SRC}":"${VOLUME_SRC}/" \
+	-v "${ABS_SRC}":"${VOLUME_SRC}/" \
 	-v "${ABS_OUT}":"${VOLUME_OUT}" \
-	--tmpfs "${TMPFS_GO_PKG}" \
 	-i -t ${SPROTOC_IMAGE_NAME} ${CMD}
 
 if [ -n "${CMD}" ]; then
