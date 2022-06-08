@@ -24,8 +24,8 @@ In addition to the languages in the table below, descriptor file generation is
 also supported.
 
 | Language | protobuf | grpc | gapic         |
-|---------|----------|------|---------------|
-| Go      | x        | x    | -<sup>1</sup> |
+|----------|----------|------|---------------|
+| Go       | x        | x    | -<sup>1</sup> |
 
 <sup>1</sup> Work in progress, requires publicly available generated protobuf
 module.
