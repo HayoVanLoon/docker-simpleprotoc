@@ -156,10 +156,18 @@ protoc_protobuf() {
 }
 
 protoc_grpc() {
-	_TARGET="${1}"
-	_OUT="${2}"
+	_TARGET=${1}
+	_OUT=${2}
+	_NO_SOURCE_RELATIVE=${3}
 
 	echo "Compiling gRPC server code"
+
+	_GO_OPT_PATH=
+	_GO_GRPC_OPT_PATH=
+	if [ -z "${_NO_SOURCE_RELATIVE}" ]; then
+		_GO_OPT_PATH=--go_opt=paths=source_relative
+		_GO_GRPC_OPT_PATH=--go-grpc_opt=paths=source_relative
+	fi
 
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
@@ -171,13 +179,13 @@ protoc_grpc() {
 		exit 3
 	fi
 
-	mkdir -p ${_OUT}
+	mkdir -p "${_OUT}"
 
 	protoc \
 		--go_out="${_OUT}" \
-		--go_opt=paths=source_relative \
+		${_GO_OPT_PATH} \
 		--go-grpc_out="${_OUT}" \
-		--go-grpc_opt=paths=source_relative \
+		${_GO_GRPC_OPT_PATH} \
 		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
@@ -199,9 +207,9 @@ protoc_gapic() {
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
 	fi
-	GAPIC_MODULE_PARAM=
+	_GAPIC_MODULE_PARAM=
 	if [ -n "${_GAPIC_MODULE_PREFIX}" ]; then
-		GAPIC_MODULE_PARAM="--go-gapic_opt=module=${_GAPIC_MODULE_PREFIX}"
+		_GAPIC_MODULE_PARAM="--go-gapic_opt=module=${_GAPIC_MODULE_PREFIX}"
 	fi
 
 	FILES=$(find "${SRC}/${TARGET}" -type f -name "*.proto" | sort)
@@ -234,7 +242,7 @@ init_mods() {
 		echo "Initialising ${NOT_V1} ..."
 		go mod init "${NOT_V1}"
 		# requires /go/pkg to be writable (like via tmpfs), will fail otherwise
-		if [ $(go mod tidy -e) ]; then
+		if [ "$(go mod tidy -e)" ]; then
 			WARNINGS="${WARNINGS}Error tidying dependencies of module ${NOT_V1} \n"
 		fi
 		echo "... done (${NOT_V1})"
@@ -246,9 +254,9 @@ report() {
 	COUNT=$(find "${1}" -type f | wc -l)
 	echo "Produced ${COUNT} ${2} file(s)."
 	if [ "${COUNT}" -lt 10 ]; then
-		for file in $(find "${1}" -type f); do
+		while IFS= read -r -d '' file; do
 			echo "    ${file}"
-		done
+		done < <(find "${1}" -type f)
 	fi
 }
 
@@ -259,7 +267,7 @@ if [ -n "${DESCRIPTOR_OUT}" ]; then
 fi
 
 if [ -n "${GO_OUT}" ]; then
-	protoc_protobuf "${TARGET}" "${GO_OUT}"
+	protoc_protobuf "${TARGET}" "${GO_OUT}" 1
 fi
 
 if [ -n "${GO_GRPC_OUT}" ]; then
@@ -271,7 +279,7 @@ if [ -n "${GO_GAPIC_OUT}" ] && [ -n "${GAPIC_PACKAGE}" ]; then
 fi
 
 if [ -n "${WARNINGS}" ]; then
-	printf "${WARNINGS}"
+	printf "%s" "${WARNINGS}"
 fi
 
 echo
