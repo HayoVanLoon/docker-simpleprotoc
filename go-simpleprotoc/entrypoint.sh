@@ -271,7 +271,7 @@ if [ -n "${GO_OUT}" ]; then
 fi
 
 if [ -n "${GO_GRPC_OUT}" ]; then
-	protoc_grpc "${TARGET}" "${GO_GRPC_OUT}"
+	protoc_grpc "${TARGET}" "${GO_GRPC_OUT}" 1
 fi
 
 if [ -n "${GO_GAPIC_OUT}" ] && [ -n "${GAPIC_PACKAGE}" ]; then
