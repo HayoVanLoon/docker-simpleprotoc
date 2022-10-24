@@ -35,6 +35,7 @@ DESCRIPTOR_OUT=
 GAPIC_PACKAGE=
 
 IMPORT_GOOGLEAPIS=-I"${PROTO_GOOGLEAPIS}"
+NO_MOD=
 
 while true; do
 	case "${1}" in
@@ -72,6 +73,10 @@ while true; do
 		;;
 	--no-googleapis-import)
 		IMPORT_GOOGLEAPIS=
+		shift 1
+		;;
+	--no-mod)
+		NO_MOD=1
 		shift 1
 		;;
 	*)
@@ -152,7 +157,7 @@ protoc_protobuf() {
 	report "${_OUT}" "message"
 
 	echo
-	init_mods "${_OUT}"
+	[ -n "${NO_MOD}" ] || init_mods "${_OUT}"
 }
 
 protoc_grpc() {
@@ -193,7 +198,7 @@ protoc_grpc() {
 	echo
 	report "${_OUT}" "gRPC"
 	echo
-	init_mods "${_OUT}"
+	[ -n "${NO_MOD}" ] || init_mods "${_OUT}"
 }
 
 protoc_gapic() {
