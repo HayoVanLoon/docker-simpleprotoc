@@ -256,11 +256,6 @@ init_mods() {
 report() {
 	COUNT=$(find "${1}" -type f | wc -l)
 	echo "Produced ${COUNT} ${2} file(s)."
-	if [ "${COUNT}" -lt 10 ]; then
-		while IFS= read -r -d '' file; do
-			echo "    ${file}"
-		done < <(find "${1}" -type f)
-	fi
 }
 
 echo

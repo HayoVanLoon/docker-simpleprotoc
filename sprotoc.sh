@@ -191,7 +191,7 @@ for ((i = 0; i < ${#FLAVOURS}; i += 1)); do
 			echo >&2 "Missing --gapic-package <client package name>"
 			exit 3
 		fi
-		GO_GAPIC_OUT="/out/gapic"
+		GO_GAPIC_OUT="/out"
 		;;
 	*)
 		echo >&2 "Unknown flavour '${FLAVOURS:$i:1}'"
