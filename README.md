@@ -55,27 +55,12 @@ above.
 ```
 out/
 |-- descriptor.pb
-|-- grpc
-|   `-- myproject
-|       |-- package1
-|       |   |-- go.mod
-|       |   |-- go.sum
-|       |   `-- somefile.pb.go
-|       `-- service1
-|           |-- go.mod
-|           |-- go.sum
-|           |-- otherfile.pb.go            
-|           `-- otherfile_grpc.pb.go
-`-- protobuf
-    `-- myproject
-        |-- package1
-        |   |-- go.mod
-        |   |-- go.sum
-        |   `-- somefile.pb.go
-        `-- service1
-            |-- go.mod
-            |-- go.sum
-            `-- otherfile.pb.go
+`-- myproject
+    |-- package1
+    |   `-- somefile.pb.go
+    `-- service1
+        |-- otherfile.pb.go
+        `-- otherfile_grpc.pb.go
 ```
 
 ## Examples

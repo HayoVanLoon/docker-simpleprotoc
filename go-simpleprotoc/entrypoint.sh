@@ -35,7 +35,7 @@ DESCRIPTOR_OUT=
 GAPIC_PACKAGE=
 
 IMPORT_GOOGLEAPIS=-I"${PROTO_GOOGLEAPIS}"
-NO_MOD=
+WITH_MOD=
 
 while true; do
 	case "${1}" in
@@ -75,8 +75,8 @@ while true; do
 		IMPORT_GOOGLEAPIS=
 		shift 1
 		;;
-	--no-mod)
-		NO_MOD=1
+	--with-mod)
+		WITH_MOD=1
 		shift 1
 		;;
 	*)
@@ -157,7 +157,6 @@ protoc_protobuf() {
 	report "${_OUT}" "message"
 
 	echo
-	[ -n "${NO_MOD}" ] || init_mods "${_OUT}"
 }
 
 protoc_grpc() {
@@ -198,7 +197,6 @@ protoc_grpc() {
 	echo
 	report "${_OUT}" "gRPC"
 	echo
-	[ -n "${NO_MOD}" ] || init_mods "${_OUT}"
 }
 
 protoc_gapic() {
@@ -273,10 +271,12 @@ fi
 
 if [ -n "${GO_OUT}" ]; then
 	protoc_protobuf "${TARGET}" "${GO_OUT}" 1
+	[ -n "${WITH_MOD}" ] && init_mods "${GO_OUT}"
 fi
 
 if [ -n "${GO_GRPC_OUT}" ]; then
 	protoc_grpc "${TARGET}" "${GO_GRPC_OUT}" 1
+	[ -n "${WITH_MOD}" ] && init_mods "${GO_GRPC_OUT}"
 fi
 
 if [ -n "${GO_GAPIC_OUT}" ] && [ -n "${GAPIC_PACKAGE}" ]; then

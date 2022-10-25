@@ -184,8 +184,8 @@ DESCRIPTOR_OUT=
 for ((i = 0; i < ${#FLAVOURS}; i += 1)); do
 	case ${FLAVOURS:$i:1} in
 	d) DESCRIPTOR_OUT="/out/descriptor.pb" ;;
-	p) GO_OUT="/out/protobuf" ;;
-	g) GO_GRPC_OUT="/out/grpc" ;;
+	p) GO_OUT="/out" ;;
+	g) GO_GRPC_OUT="/out" ;;
 	c)
 		if [ -z "${GO_GAPIC_PACKAGE}" ]; then
 			echo >&2 "Missing --gapic-package <client package name>"
