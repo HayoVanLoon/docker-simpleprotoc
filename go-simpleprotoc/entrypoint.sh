@@ -71,6 +71,10 @@ while true; do
 		GAPIC_MODULE_PREFIX="${2}"
 		shift 2
 		;;
+	--gapic-config)
+		GAPIC_CONFIG="${2}"
+		shift 2
+		;;
 	--no-googleapis-import)
 		IMPORT_GOOGLEAPIS=
 		shift 1
@@ -202,17 +206,22 @@ protoc_grpc() {
 protoc_gapic() {
 	_TARGET="${1}"
 	_OUT="${2}"
-	_GAPIC_PACKAGE="${3}"
+	_GAPIC_PACKAGE=${3}
 	_GAPIC_MODULE_PREFIX="${4}"
+	_GAPIC_CONFIG="${5}"
 
 	echo "Generating GAPIC client code"
 
 	if [ -z "${_TARGET}" ]; then
 		_TARGET=".*"
 	fi
-	_GAPIC_MODULE_PARAM=
+	_GAPIC_MODULE_OPT=
 	if [ -n "${_GAPIC_MODULE_PREFIX}" ]; then
-		_GAPIC_MODULE_PARAM="--go-gapic_opt=module=${_GAPIC_MODULE_PREFIX}"
+		_GAPIC_MODULE_OPT="--go-gapic_opt=module=${_GAPIC_MODULE_PREFIX}"
+	fi
+	_GAPIC_CONFIG_OPT=
+	if [ -n "${_GAPIC_CONFIG}" ]; then
+		_GAPIC_CONFIG_OPT="--go-gapic_opt=grpc-service-config=${_GAPIC_CONFIG}"
 	fi
 
 	FILES=$(find "${SRC}/${TARGET}" -type f -name "*.proto" | sort)
@@ -225,8 +234,9 @@ protoc_gapic() {
 
 	protoc \
 		--go-gapic_out=${_OUT} \
-		--go-gapic_opt=go-gapic-package=${_GAPIC_PACKAGE} \
-		${_GAPIC_MODULE_PARAM} \
+		--go-gapic_opt=go-gapic-package="${_GAPIC_PACKAGE}" \
+		${_GAPIC_MODULE_OPT} \
+		${_GAPIC_CONFIG_OPT} \
 		${IMPORT_GOOGLEAPIS} \
 		-I"${SRC}" \
 		${FILES}
@@ -275,7 +285,7 @@ if [ -n "${GO_GRPC_OUT}" ]; then
 fi
 
 if [ -n "${GO_GAPIC_OUT}" ] && [ -n "${GAPIC_PACKAGE}" ]; then
-	protoc_gapic "${TARGET}" "${GO_GAPIC_OUT}" "${GAPIC_PACKAGE}" "${GAPIC_MODULE_PREFIX}"
+	protoc_gapic "${TARGET}" "${GO_GAPIC_OUT}" "${GAPIC_PACKAGE}" "${GAPIC_MODULE_PREFIX}" "${GAPIC_CONFIG}"
 fi
 
 if [ -n "${WARNINGS}" ]; then
