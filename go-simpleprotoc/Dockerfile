@@ -29,7 +29,7 @@ WORKDIR /downloads
 RUN curl -L -o api-common-protos.zip https://github.com/googleapis/api-common-protos/archive/refs/heads/main.zip
 RUN unzip api-common-protos.zip
 
-FROM golang:latest
+FROM --platform=linux/amd64 golang:latest
 
 ARG GO_PLUGIN_VERSION="v1.28"
 ARG GRPC_PLUGIN_VERSION="v1.2"
